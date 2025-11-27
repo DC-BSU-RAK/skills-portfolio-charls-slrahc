@@ -22,7 +22,6 @@ class StudentManager:
         self.create_gui()
     
     def load_data(self):
-        """Load student data from file"""
         try:
             if not os.path.exists(self.filename):
                 # Create sample data if file doesn't exist
@@ -55,14 +54,11 @@ class StudentManager:
             self.students = []
     
     def load_jokes(self):
-        """Load marks from studentMarks file"""
-   
         with open('studentMarks.txt', 'r', encoding='utf-8') as file:
                 jokes = [line.strip() for line in file if line.strip()]
         return jokes
     
     def save_data(self):
-        """Save student data to file"""
         try:
             with open(self.filename, 'w') as file:
                 file.write(f"{len(self.students)}\n")
@@ -74,14 +70,12 @@ class StudentManager:
             return False
     
     def calculate_percentage(self, student):
-        """Calculate overall percentage"""
         total_coursework = student['coursework1'] + student['coursework2'] + student['coursework3']
         total_marks = total_coursework + student['exam']  # Max 60 coursework + 100 exam = 160
         percentage = (total_marks / 160) * 100
         return round(percentage, 2)
     
     def calculate_grade(self, percentage):
-        """Calculate grade based on percentage"""
         if percentage >= 70:
             return 'A'
         elif percentage >= 60:
@@ -94,7 +88,6 @@ class StudentManager:
             return 'F'
     
     def create_gui(self):
-        """Create the main GUI"""
         # Configure styles for blueish theme
         style = ttk.Style()
         style.configure('Blue.TFrame', background='#e6f2ff')
@@ -145,12 +138,10 @@ class StudentManager:
         main_frame.rowconfigure(8, weight=1)
     
     def display_results(self, text):
-        """Display results in the text widget"""
         self.results_text.delete(1.0, tk.END)
         self.results_text.insert(1.0, text)
     
     def format_student_output(self, student):
-        """Format individual student output"""
         percentage = self.calculate_percentage(student)
         grade = self.calculate_grade(percentage)
         total_coursework = student['coursework1'] + student['coursework2'] + student['coursework3']
@@ -166,7 +157,6 @@ class StudentManager:
         return output
     
     def view_all_students(self):
-        """Menu item 1: View all student records"""
         if not self.students:
             self.display_results("No student records found.")
             return
@@ -189,7 +179,6 @@ class StudentManager:
         self.display_results(output)
     
     def view_individual_student(self):
-        """Menu item 2: View individual student record"""
         if not self.students:
             messagebox.showwarning("Warning", "No student records available.")
             return
@@ -221,7 +210,6 @@ class StudentManager:
         ttk.Button(selection_window, text="Show Record", command=show_selected, style='Blue.TButton').pack(pady=10)
     
     def show_highest_student(self):
-        """Menu item 3: Show student with highest overall mark"""
         if not self.students:
             messagebox.showwarning("Warning", "No student records available.")
             return
@@ -235,7 +223,6 @@ class StudentManager:
         self.display_results(output)
     
     def show_lowest_student(self):
-        """Menu item 4: Show student with lowest overall mark"""
         if not self.students:
             messagebox.showwarning("Warning", "No student records available.")
             return
@@ -249,7 +236,6 @@ class StudentManager:
         self.display_results(output)
     
     def sort_students(self):
-        """Menu item 5: Sort student records"""
         if not self.students:
             messagebox.showwarning("Warning", "No student records available.")
             return
@@ -299,7 +285,6 @@ class StudentManager:
         ttk.Button(sort_window, text="Sort", command=perform_sort, style='Blue.TButton').pack(pady=10)
     
     def add_student(self):
-        """Menu item 6: Add a student record"""
         add_window = tk.Toplevel(self.root)
         add_window.title("Add Student")
         add_window.geometry("300x350")
@@ -384,7 +369,6 @@ class StudentManager:
         ttk.Button(add_window, text="Save", command=save_student, style='Blue.TButton').pack(pady=10)
     
     def delete_student(self):
-        """Menu item 7: Delete a student record"""
         if not self.students:
             messagebox.showwarning("Warning", "No student records available.")
             return
@@ -416,7 +400,6 @@ class StudentManager:
         ttk.Button(delete_window, text="Delete", command=delete_selected, style='Blue.TButton').pack(pady=10)
     
     def update_student(self):
-        """Menu item 8: Update a student record"""
         if not self.students:
             messagebox.showwarning("Warning", "No student records available.")
             return
@@ -444,7 +427,6 @@ class StudentManager:
         ttk.Button(update_window, text="Update", command=update_selected, style='Blue.TButton').pack(pady=10)
     
     def show_update_form(self, student, index):
-        """Show form to update student details"""
         update_form = tk.Toplevel(self.root)
         update_form.title(f"Update {student['name']}")
         update_form.geometry("300x350")
@@ -514,9 +496,9 @@ class StudentManager:
         ttk.Button(update_form, text="Save Changes", command=save_update, style='Blue.TButton').pack(pady=10)
 
 def main():
-    root = tk.Tk()
-    app = StudentManager(root)
-    root.mainloop()
+    root = tk.Tk()  # Create root window
+    app = StudentManager(root) # Instantiate the app
+    root.mainloop() # Start the Tkinter event loop
 
 if __name__ == "__main__":
     main()

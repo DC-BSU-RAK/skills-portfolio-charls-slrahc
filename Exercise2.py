@@ -3,212 +3,206 @@ from tkinter import messagebox
 import random
 
 class JokeTellingAssistant:
+    
     def __init__(self, root):
         self.root = root
         self.root.title("Alexa - Joke Teller")
-        self.root.geometry("1000x700")  # Increased window size
-        self.root.resizable(False, False)
+        self.root.geometry("1000x700")  # Increased window size for better visibility
+        self.root.resizable(False, False)  # Prevent resizing to maintain layout
         
-        # Load jokes from file
+        # Load jokes from file into a list
         self.jokes = self.load_jokes()
-        self.current_joke = None
-        self.current_setup = ""
-        self.current_punchline = ""
+        self.current_joke = None  # Will hold the currently selected joke string
+        self.current_setup = ""   # Setup part of the current joke
+        self.current_punchline = ""  # Punchline part of the current joke
         
-        # Colors and styling
-        self.bg_color = "#232f3e"  # Alexa blue-ish dark
-        self.button_color = "#ff9900"  # Amazon orange
-        self.text_color = "white"
-        self.setup_color = "#00a8e1"  # Light blue for setup
+        # Define color scheme for the GUI (Alexa-inspired)
+        self.bg_color = "#232f3e"  # Dark blue background
+        self.button_color = "#ff9900"  # Orange for primary buttons
+        self.text_color = "white"  # White text for contrast
+        self.setup_color = "#00a8e1"  # Light blue for joke setup
         self.punchline_color = "#ff9900"  # Orange for punchline
         
-        self.root.configure(bg=self.bg_color)
+        self.root.configure(bg=self.bg_color)  # Apply background color to root
         
-        # Create and place widgets
+        # Create and place all GUI widgets
         self.create_widgets()
         
     def load_jokes(self):
-        """Load jokes from the randomJokes.txt file"""
-   
         with open('randomJokes.txt', 'r', encoding='utf-8') as file:
-                jokes = [line.strip() for line in file if line.strip()]
+            jokes = [line.strip() for line in file if line.strip()]  # Strip and filter non-empty lines
         return jokes
-
     
     def create_widgets(self):
-        """Create and arrange all GUI widgets"""
-        # Main title - Bigger and centered
+        # Main title label - Centered and prominent
         self.title_label = tk.Label(
             self.root, 
-            text="🎭 Alexa Joke Teller", 
-            font=("Arial", 32, "bold"),  # Increased font size
+            text="Alexa Joke Teller", 
+            font=("Arial", 32, "bold"),  # Large bold font for title
             bg=self.bg_color, 
             fg=self.text_color
         )
-        self.title_label.pack(pady=40)  # Increased padding
+        self.title_label.pack(pady=40)  # Add vertical padding
         
-        # Subtitle - Bigger and centered
+        # Subtitle label - Smaller than title, descriptive
         self.subtitle_label = tk.Label(
             self.root,
             text="Your personal joke-telling assistant",
-            font=("Arial", 18),  # Increased font size
+            font=("Arial", 18),  # Medium font for subtitle
             bg=self.bg_color,
             fg=self.text_color
         )
         self.subtitle_label.pack(pady=10)
         
-        # Joke display frame - Centered with more space
+        # Frame to hold the joke display labels, centered with padding
         self.joke_frame = tk.Frame(self.root, bg=self.bg_color)
         self.joke_frame.pack(pady=50, padx=50, fill='both', expand=True)
         
-        # Setup label - Bigger font
+        # Label for displaying the joke setup (question part)
         self.setup_label = tk.Label(
             self.joke_frame,
             text="Click 'Tell me a Joke' to hear a joke!",
-            font=("Arial", 20, "bold"),  # Increased font size
+            font=("Arial", 20, "bold"),  # Bold font for setup
             bg=self.bg_color,
             fg=self.setup_color,
-            wraplength=700,  # Increased wrap length
-            justify='center'
+            wraplength=700,  # Wrap text at 700 pixels for readability
+            justify='center'  # Center-align text
         )
         self.setup_label.pack(expand=True, pady=20)
         
-        # Punchline label - Bigger font
+        # Label for displaying the punchline (answer part)
         self.punchline_label = tk.Label(
             self.joke_frame,
             text="",
-            font=("Arial", 18, "italic"),  # Increased font size
+            font=("Arial", 18, "italic"),  # Italic font for punchline
             bg=self.bg_color,
             fg=self.punchline_color,
-            wraplength=700,  # Increased wrap length
+            wraplength=700,  # Wrap text at 700 pixels
             justify='center'
         )
         self.punchline_label.pack(expand=True, pady=20)
         
-        # Button frame - Centered
+        # Frame to hold the buttons, centered
         self.button_frame = tk.Frame(self.root, bg=self.bg_color)
         self.button_frame.pack(pady=40)
         
-        # Button style - Bigger buttons
+        # Common style dictionary for buttons (consistent sizing and appearance)
         button_style = {
-            'font': ("Arial", 16, "bold"),  # Increased font size
-            'width': 20,  # Increased width
-            'height': 2,   # Same height but feels bigger due to font
-            'bd': 3,      # Thicker border
-            'relief': 'raised'
+            'font': ("Arial", 16, "bold"),  # Bold font for buttons
+            'width': 20,  # Fixed width for uniformity
+            'height': 2,  # Fixed height
+            'bd': 3,      # Border thickness
+            'relief': 'raised'  # Raised appearance
         }
         
-        # Tell Joke button
+        # Button to tell a new joke (starts the process)
         self.tell_joke_btn = tk.Button(
             self.button_frame,
             text="🎤 Alexa tell me a Joke",
-            command=self.tell_joke,
+            command=self.tell_joke,  # Calls tell_joke method
             bg=self.button_color,
             fg="white",
             **button_style
         )
-        self.tell_joke_btn.grid(row=0, column=0, padx=15, pady=15)  # Increased padding
+        self.tell_joke_btn.grid(row=0, column=0, padx=15, pady=15)  # Position in grid
         
-        # Show Punchline button
+        # Button to reveal the punchline (initially disabled)
         self.punchline_btn = tk.Button(
             self.button_frame,
             text="😂 Show Punchline",
-            command=self.show_punchline,
-            bg="#32a852",
+            command=self.show_punchline,  # Calls show_punchline method
+            bg="#32a852",  # Green color
             fg="white",
-            state='disabled',
+            state='disabled',  # Disabled until a joke is told
             **button_style
         )
-        self.punchline_btn.grid(row=0, column=1, padx=15, pady=15)  # Increased padding
+        self.punchline_btn.grid(row=0, column=1, padx=15, pady=15)
         
-        # Next Joke button
+        # Button to get the next joke (initially disabled)
         self.next_joke_btn = tk.Button(
             self.button_frame,
             text="➡️ Next Joke",
-            command=self.next_joke,
-            bg="#007bff",
+            command=self.next_joke,  # Calls next_joke method
+            bg="#007bff",  # Blue color
             fg="white",
-            state='disabled',
+            state='disabled',  # Disabled until a joke is told
             **button_style
         )
-        self.next_joke_btn.grid(row=1, column=0, padx=15, pady=15)  # Increased padding
+        self.next_joke_btn.grid(row=1, column=0, padx=15, pady=15)
         
-        # Quit button
+        # Button to quit the application
         self.quit_btn = tk.Button(
             self.button_frame,
             text="🚪 Quit",
-            command=self.quit_app,
-            bg="#dc3545",
+            command=self.quit_app,  # Calls quit_app method
+            bg="#dc3545",  # Red color
             fg="white",
             **button_style
         )
-        self.quit_btn.grid(row=1, column=1, padx=15, pady=15)  # Increased padding
+        self.quit_btn.grid(row=1, column=1, padx=15, pady=15)
         
-        # Status label - Bigger font
+        # Status label at the bottom to show app state or messages
         self.status_label = tk.Label(
             self.root,
             text=f"📚 Loaded {len(self.jokes)} jokes - Ready to make you laugh!",
-            font=("Arial", 14),  # Increased font size
+            font=("Arial", 14),  # Medium font for status
             bg=self.bg_color,
             fg=self.text_color
         )
         self.status_label.pack(pady=20)
         
-        # Center everything by configuring grid weights
+        # Configure grid weights for centering (though not strictly necessary here)
         self.button_frame.grid_columnconfigure(0, weight=1)
         self.button_frame.grid_columnconfigure(1, weight=1)
         
-        # Center the button frame content
+        # Center the button frame content (rows)
         self.button_frame.grid_rowconfigure(0, weight=1)
         self.button_frame.grid_rowconfigure(1, weight=1)
     
     def tell_joke(self):
-        """Tell a random joke - show only the setup"""
         if not self.jokes:
-            messagebox.showerror("Error", "No jokes available!")
+            messagebox.showerror("Error", "No jokes available!")  # Error if no jokes loaded
             return
         
-        # Select random joke
+        # Select a random joke from the list
         self.current_joke = random.choice(self.jokes)
         
-        # Split joke into setup and punchline
+        # Split the joke into setup and punchline based on the first '?'
         if '?' in self.current_joke:
-            parts = self.current_joke.split('?', 1)
-            self.current_setup = parts[0] + "?"
-            self.current_punchline = parts[1] if len(parts) > 1 else ""
+            parts = self.current_joke.split('?', 1)  # Split only on first '?'
+            self.current_setup = parts[0] + "?"  # Include the '?' in setup
+            self.current_punchline = parts[1] if len(parts) > 1 else ""  # Punchline after '?'
         else:
-            # Fallback if no question mark found
+            # Fallback if no '?' found (treat whole as setup)
             self.current_setup = self.current_joke
             self.current_punchline = "(Punchline not available)"
         
-        # Update display
+        # Update the setup label with the setup text
         self.setup_label.config(text=self.current_setup)
-        self.punchline_label.config(text="")
+        self.punchline_label.config(text="")  # Clear punchline label
         
-        # Enable/disable buttons
+        # Enable punchline and next joke buttons, disable tell joke button
         self.punchline_btn.config(state='normal')
         self.next_joke_btn.config(state='normal')
         self.tell_joke_btn.config(state='disabled')
         
-        # Update status
+        # Update status to prompt user for next action
         self.status_label.config(text="🎭 Joke ready! Click 'Show Punchline' for the funny part!")
     
     def show_punchline(self):
-        """Display the punchline of the current joke"""
         if self.current_punchline:
-            self.punchline_label.config(text=self.current_punchline)
-            self.punchline_btn.config(state='disabled')
+            self.punchline_label.config(text=self.current_punchline)  # Show punchline
+            self.punchline_btn.config(state='disabled')  # Disable button after use
             self.status_label.config(text="😄 Hope that made you smile! Try another joke?")
         else:
-            messagebox.showinfo("Info", "No punchline available for this joke.")
+            messagebox.showinfo("Info", "No punchline available for this joke.")  # Info if no punchline
     
     def next_joke(self):
-        """Get the next random joke"""
-        # Reset display
+        # Reset labels to indicate loading/next action
         self.setup_label.config(text="🔄 Getting another joke...")
         self.punchline_label.config(text="")
         
-        # Enable tell joke button and disable others
+        # Reset button states: enable tell joke, disable others
         self.tell_joke_btn.config(state='normal')
         self.punchline_btn.config(state='disabled')
         self.next_joke_btn.config(state='disabled')
@@ -216,18 +210,17 @@ class JokeTellingAssistant:
         # Update status
         self.status_label.config(text="🔄 Ready for another joke!")
         
-        # After a brief delay, show the prompt
+        # After 500ms delay, update setup label to prompt for new joke
         self.root.after(500, lambda: self.setup_label.config(text="🎤 Click 'Alexa tell me a Joke' for another joke!"))
     
     def quit_app(self):
-        """Quit the application with confirmation"""
-        if messagebox.askyesno("Quit", "Are you sure you want to quit?"):
-            self.root.quit()
+        if messagebox.askyesno("Quit", "Are you sure you want to quit?"):  # Confirm quit
+            self.root.quit()  # Close the Tkinter main loop
 
 def main():
-    root = tk.Tk()
-    app = JokeTellingAssistant(root)
-    root.mainloop()
+    root = tk.Tk()  # Create root window
+    app = JokeTellingAssistant(root)  # Instantiate the app
+    root.mainloop()  # Start the Tkinter event loop
 
 if __name__ == "__main__":
-    main()
+    main()  
