@@ -53,10 +53,19 @@ class StudentManager:
             messagebox.showerror("Error", f"Failed to load data: {str(e)}")
             self.students = []
     
-    def load_jokes(self):
-        with open('studentMarks.txt', 'r', encoding='utf-8') as file:
-                jokes = [line.strip() for line in file if line.strip()]
-        return jokes
+    def create_sample_data(self):
+        """Create sample data if file doesn't exist"""
+        sample_data = [
+            "5\n",
+            "1001,John Smith,15,18,17,75\n",
+            "1002,Emily Johnson,19,20,18,88\n",
+            "1003,Michael Brown,12,14,13,62\n",
+            "1004,Sarah Davis,17,16,18,79\n",
+            "1005,David Wilson,14,15,16,70\n"
+        ]
+        
+        with open(self.filename, 'w') as file:
+            file.writelines(sample_data)
     
     def save_data(self):
         try:
@@ -104,6 +113,10 @@ class StudentManager:
         title_label = ttk.Label(main_frame, text="Student Manager", style='Title.TLabel')
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
         
+        # Left frame for buttons
+        left_frame = ttk.Frame(main_frame, style='Blue.TFrame')
+        left_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        
         # Menu buttons
         buttons = [
             ("1. View All Student Records", self.view_all_students),
@@ -117,25 +130,26 @@ class StudentManager:
         ]
         
         for i, (text, command) in enumerate(buttons):
-            btn = ttk.Button(main_frame, text=text, command=command, width=30, style='Blue.TButton')
-            btn.grid(row=i+1, column=0, pady=5, padx=10, sticky=tk.W)
+            btn = ttk.Button(left_frame, text=text, command=command, width=30, style='Blue.TButton')
+            btn.grid(row=i, column=0, pady=5, sticky=tk.W+tk.E)
         
         # Results area with blueish background
         self.results_text = tk.Text(main_frame, width=70, height=25, wrap=tk.WORD, 
                                    bg='#f0f8ff', fg='#003366', font=('Arial', 10),
                                    selectbackground='#cce5ff', selectforeground='#003366')
-        self.results_text.grid(row=1, column=1, rowspan=8, padx=10, pady=5, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.results_text.grid(row=1, column=1, padx=10, pady=5, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Scrollbar for results
         scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.results_text.yview)
-        scrollbar.grid(row=1, column=2, rowspan=8, sticky=(tk.N, tk.S))
+        scrollbar.grid(row=1, column=2, sticky=(tk.N, tk.S))
         self.results_text.configure(yscrollcommand=scrollbar.set)
         
         # Configure grid weights
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(8, weight=1)
+        main_frame.rowconfigure(1, weight=1)
+        left_frame.columnconfigure(0, weight=1)
     
     def display_results(self, text):
         self.results_text.delete(1.0, tk.END)
@@ -243,51 +257,74 @@ class StudentManager:
         # Create sort selection dialog with blueish theme
         sort_window = tk.Toplevel(self.root)
         sort_window.title("Sort Students")
-        sort_window.geometry("250x150")
+        sort_window.geometry("300x250")
         sort_window.configure(bg='#e6f2ff')
         
         ttk.Label(sort_window, text="Sort by:", style='Blue.TLabel').pack(pady=10)
         
-        sort_var = tk.StringVar(value="percentage")
+        # Create a frame for the sort buttons
+        button_frame = ttk.Frame(sort_window, style='Blue.TFrame')
+        button_frame.pack(pady=10, fill='both', expand=True)
         
-        ttk.Radiobutton(sort_window, text="Percentage (Descending)", 
-                       variable=sort_var, value="percentage", style='Blue.TLabel').pack(anchor=tk.W)
-        ttk.Radiobutton(sort_window, text="Name (Ascending)", 
-                       variable=sort_var, value="name", style='Blue.TLabel').pack(anchor=tk.W)
-        ttk.Radiobutton(sort_window, text="Student Code (Ascending)", 
-                       variable=sort_var, value="code", style='Blue.TLabel').pack(anchor=tk.W)
-        
-        def perform_sort():
-            if sort_var.get() == "percentage":
-                sorted_students = sorted(self.students, key=lambda x: self.calculate_percentage(x), reverse=True)
-            elif sort_var.get() == "name":
-                sorted_students = sorted(self.students, key=lambda x: x['name'])
-            else:  # code
-                sorted_students = sorted(self.students, key=lambda x: x['code'])
-            
-            output = f"SORTED STUDENT RECORDS ({sort_var.get().upper()})\n"
-            output += "=" * 50 + "\n\n"
-            
-            total_percentage = 0
-            for student in sorted_students:
-                output += self.format_student_output(student)
-                total_percentage += self.calculate_percentage(student)
-            
-            # Summary
-            avg_percentage = total_percentage / len(sorted_students)
-            output += f"\nSUMMARY:\n"
-            output += f"Number of students: {len(sorted_students)}\n"
-            output += f"Average percentage: {avg_percentage:.2f}%\n"
-            
-            self.display_results(output)
+        def sort_by_percentage():
+            sorted_students = sorted(self.students, key=lambda x: self.calculate_percentage(x), reverse=True)
+            self.display_sorted_results(sorted_students, "PERCENTAGE (DESCENDING)")
             sort_window.destroy()
         
-        ttk.Button(sort_window, text="Sort", command=perform_sort, style='Blue.TButton').pack(pady=10)
+        def sort_by_name():
+            sorted_students = sorted(self.students, key=lambda x: x['name'])
+            self.display_sorted_results(sorted_students, "NAME (ASCENDING)")
+            sort_window.destroy()
+        
+        def sort_by_code():
+            sorted_students = sorted(self.students, key=lambda x: x['code'])
+            self.display_sorted_results(sorted_students, "STUDENT CODE (ASCENDING)")
+            sort_window.destroy()
+        
+        def sort_by_total_marks():
+            sorted_students = sorted(self.students, key=lambda x: (x['coursework1'] + x['coursework2'] + x['coursework3'] + x['exam']), reverse=True)
+            self.display_sorted_results(sorted_students, "TOTAL MARKS (DESCENDING)")
+            sort_window.destroy()
+        
+        # Sort buttons
+        percentage_btn = ttk.Button(button_frame, text="Percentage (Highest to Lowest)", 
+                                   command=sort_by_percentage, width=25, style='Blue.TButton')
+        percentage_btn.pack(pady=5, fill='x')
+        
+        name_btn = ttk.Button(button_frame, text="Name (A to Z)", 
+                             command=sort_by_name, width=25, style='Blue.TButton')
+        name_btn.pack(pady=5, fill='x')
+        
+        code_btn = ttk.Button(button_frame, text="Student Code (Low to High)", 
+                             command=sort_by_code, width=25, style='Blue.TButton')
+        code_btn.pack(pady=5, fill='x')
+        
+        total_marks_btn = ttk.Button(button_frame, text="Total Marks (Highest to Lowest)", 
+                                    command=sort_by_total_marks, width=25, style='Blue.TButton')
+        total_marks_btn.pack(pady=5, fill='x')
+    
+    def display_sorted_results(self, sorted_students, sort_type):
+        """Helper method to display sorted results"""
+        output = f"SORTED STUDENT RECORDS ({sort_type})\n"
+        output += "=" * 50 + "\n\n"
+        
+        total_percentage = 0
+        for student in sorted_students:
+            output += self.format_student_output(student)
+            total_percentage += self.calculate_percentage(student)
+        
+        # Summary
+        avg_percentage = total_percentage / len(sorted_students)
+        output += f"\nSUMMARY:\n"
+        output += f"Number of students: {len(sorted_students)}\n"
+        output += f"Average percentage: {avg_percentage:.2f}%\n"
+        
+        self.display_results(output)
     
     def add_student(self):
         add_window = tk.Toplevel(self.root)
         add_window.title("Add Student")
-        add_window.geometry("300x350")
+        add_window.geometry("300x450")
         add_window.configure(bg='#e6f2ff')
         
         # Form fields
